@@ -24,7 +24,7 @@
 		initWebSocket();
 		function initWebSocket(){
 			if ('WebSocket' in window){
-				var connection = new WebSocket('ws://192.168.80.102:3001/');
+				var connection = new WebSocket('ws://localhost:3001/');
 				connection.onopen = function(){
 					Materialize.toast('Successfully connected to server', 2000, 'light-green darken-1'); // 4000 is the duration of the toast
 					console.info('Connection open! Loading data via WebSocket...');

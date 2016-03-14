@@ -35,7 +35,7 @@
 		initWebSocket();
 		function initWebSocket(){
 			if ('WebSocket' in window){
-				var connection = new WebSocket('ws://192.168.80.102:3001/');
+				var connection = new WebSocket('ws://localhost:3001/');
 				connection.onopen = function(){
 					Materialize.toast('Successfully connected to server', 2000, 'light-green darken-1'); // 4000 is the duration of the toast
 					console.info('Connection open! Loading data via WebSocket...');
@@ -101,9 +101,7 @@
 				var voices = window.speechSynthesis.getVoices();
 				msg.voice = voices[10]; // Note: some voices don't support altering params
 				msg.voiceURI = 'native';
-				//msg.volume = 1; // 0 to 1
-				//msg.rate = 1; // 0.1 to 10
-				//msg.pitch = 2; //0 to 2
+				
 				msg.text = text;
 				msg.lang = 'en-GB';
 
