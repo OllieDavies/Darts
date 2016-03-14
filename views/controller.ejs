@@ -1,0 +1,94 @@
+<!-- views/pages/index.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ./partials/head %>
+    <title>Darts - Home</title>
+</head>
+<body>
+	 <% include ./partials/header %>
+    
+	<div class="container center-align">
+		<h3><span id="currentPlayer"><%- nextPlayerName %></span>'s Turn</h3>
+		<input id="score" type="text" pattern="\d*" placeholder="Score" class="center-align" onkeypress="if(this.value) {if (window.event.keyCode == 13) { $('#btnUpdate').click(); }}" />		
+		<button class="btn btn-large btn-key" id="btnUpdate">Update</button></br></br></br></br></br></br>
+		<center>
+			<a href="/restart" class="btn btn-large red darken-1">Restart Game</a>
+		</center>
+	</div>
+
+    <% include ./partials/footer %>
+    
+    <script>
+		initWebSocket();
+		function initWebSocket(){
+			if ('WebSocket' in window){
+				var connection = new WebSocket('ws://192.168.80.102:3001/');
+				connection.onopen = function(){
+					Materialize.toast('Successfully connected to server', 2000, 'light-green darken-1'); // 4000 is the duration of the toast
+					console.info('Connection open! Loading data via WebSocket...');
+				}
+		
+				connection.onclose = function(){
+					Materialize.toast('Lost connection to server. Attempting to reconnect...', 750, 'red darken-1'); // 4000 is the duration of the toast
+					console.warn('Connection closed! Attempting to (re)connect in 3 seconds...');
+					setTimeout(function(){
+						initWebSocket();
+					}, 1000);
+				}
+				
+				var nextPlayer = 0,
+					nextPlayerName = '';
+				
+				connection.onmessage = function(e){
+					var res = JSON.parse(e.data);
+					
+					console.log(res);
+					switch(res.command){
+						case 'update':
+							nextPlayer = res.data.nextPlayer;
+							nextPlayerName = res.data.nextPlayerName;
+							document.getElementById('currentPlayer').innerText = res.data.nextPlayerName;
+							break;
+						case 'newest':
+							nextPlayer = res.nextPlayer;
+							nextPlayerName = res.nextPlayerName;
+							document.getElementById('currentPlayer').innerText = res.nextPlayerName;
+							break;			
+					}
+				}
+				
+				$('#btnUpdate').click(function(){
+					console.log('btnUpdate :: click');
+					var data = JSON.stringify({
+						player: nextPlayer,
+						score: $('#score').val()
+					});
+				
+					if(nextPlayer == 0){
+						nextPlayer = 1;
+					} else {
+						nextPlayer = 0;
+					}
+				
+					console.log(data);
+				
+					connection.send(data);
+					$('#score').val('');
+					$('#score').focus();
+				});
+
+			} else {
+				 console.warn('WebSockets not supported! Falling back to polling...');
+			}
+			
+			$('.btn-key').click(function(){
+				
+			});
+			
+		}
+		
+    </script>
+</body>
+</html>

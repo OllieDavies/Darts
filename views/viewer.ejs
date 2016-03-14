@@ -1,0 +1,117 @@
+<!-- views/pages/index.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <% include ./partials/head %>
+    <title>Darts - Home</title>
+</head>
+<body style="">
+	 <% include ./partials/header %>
+	 <div class="container">
+		<div class="row valign-wrapper" id="player-containers">
+			<div class="col l6 valign" id="player0_container">
+				<center>
+					<h2 id="player0_name" class="xl"><%- players[0].name %></h2>
+					<h1 id="player0_score" class="xl"><%- players[0].score %></h1>
+					<h3 class="xl">remaining</h3>
+				</center>
+			</div>
+			<div class="col l6 valign" id="player1_container">
+				<center>
+					<h2 id="player1_name" class="xl"><%- players[1].name %></h2>
+					<h1 id="player1_score" class="xl"><%- players[1].score %></h1>
+					<h3 class="xl">remaining</h3>
+				</center>
+			</div>
+		</div>
+	</div>
+    <% include ./partials/footer %>
+    
+    
+    <script>
+    	$('#player-containers').height($(window).height() - (85 + 70));
+    
+		initWebSocket();
+		function initWebSocket(){
+			if ('WebSocket' in window){
+				var connection = new WebSocket('ws://192.168.80.102:3001/');
+				connection.onopen = function(){
+					Materialize.toast('Successfully connected to server', 2000, 'light-green darken-1'); // 4000 is the duration of the toast
+					console.info('Connection open! Loading data via WebSocket...');
+				}
+		
+				connection.onclose = function(){
+					Materialize.toast('Lost connection to server. Attempting to reconnect...', 1000, 'red darken-1'); // 4000 is the duration of the toast
+					console.warn('Connection closed! Attempting to (re)connect in 2 seconds...');
+					setTimeout(function(){
+						initWebSocket();
+					}, 2000);
+				}
+
+
+				
+				connection.onmessage = function(e){
+					var res = JSON.parse(e.data);
+					switch(res.command){
+						case 'update':
+							console.log(res.data);
+							document.getElementById('player' + res.data.player + '_score').innerText = res.data.score;
+							
+							if(res.data.justscored == 180){
+								var audio = new Audio('/javascripts/180.mp3');
+								audio.play();
+							}
+							
+							$('#player' + res.data.player + '_container').delay(1000).fadeTo( "slow" , 0.2, function() {
+								
+							});
+							
+							$('#player' + res.data.nextPlayer + '_container').delay(1500).fadeTo( "slow" , 1, function() {
+								if(document.getElementById('player' + res.data.nextPlayer + '_score').innerText <= 70){
+									speakScore(document.getElementById('player' + res.data.nextPlayer + '_name').innerText + ', you require ' + document.getElementById('player' + res.data.nextPlayer + '_score').innerText);
+								}
+							});
+							
+							break;
+						case 'newest':
+							document.getElementById('player0_name').innerText = res.players[0].name;
+							document.getElementById('player1_name').innerText = res.players[1].name;
+							
+							document.getElementById('player0_score').innerText = res.players[0].score;
+							document.getElementById('player1_score').innerText = res.players[1].score;
+							
+							if(res.nextPlayer == 0){
+								$('#player0_container').fadeTo( "slow" , 1);
+								$('#player1_container').fadeTo( "slow" , 0.2);
+							} else {
+								$('#player0_container').fadeTo( "slow" , 0.2);
+								$('#player1_container').fadeTo( "slow" , 1);
+							}
+							
+							break;			
+					}
+				}
+			} else {
+				 console.warn('WebSockets not supported! Falling back to polling...');
+			}
+			
+			function speakScore(text){
+				var msg = new SpeechSynthesisUtterance();
+				var voices = window.speechSynthesis.getVoices();
+				msg.voice = voices[10]; // Note: some voices don't support altering params
+				msg.voiceURI = 'native';
+				//msg.volume = 1; // 0 to 1
+				//msg.rate = 1; // 0.1 to 10
+				//msg.pitch = 2; //0 to 2
+				msg.text = text;
+				msg.lang = 'en-GB';
+
+				speechSynthesis.speak(msg);
+			
+			}
+	
+		}
+    </script>
+</body>
+</html>

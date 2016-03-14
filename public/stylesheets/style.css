@@ -1,0 +1,57 @@
+@import url(https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900);
+
+body {
+	font: 14px "Roboto", "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+	color: #00B7FF;
+}
+
+.time-selection{
+	margin-top:0rem;
+}
+
+.day-label{
+	margin-top:0.5rem;
+}
+
+.alert-container{
+	margin-bottom:0;
+}
+
+.navbar_avatar{
+	margin-right:10px;
+	border-radius:3px;
+	box-shadow:1px 1px 1px rgba(50,50,50,0.5);
+}
+
+h1.xl {
+	font-weight:300;
+	font-size:13em;
+	margin:0px;
+}
+
+h2.xl {
+	margin:0px;
+	font-weight:500;
+	margin-top:0px;
+}
+
+h3.xl {
+	font-weight:300;
+	margin:0px;
+}
+
+
+.btn-key{
+	line-height:2em;
+	font-size:3em;
+	width:100%;
+	min-height:80px;
+}
+
+#score{
+	height:2em;
+	font-size:4em;
+}
